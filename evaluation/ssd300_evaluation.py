@@ -31,16 +31,13 @@ def main():
     # pre-trained weight path
     path['pre_trained_weight'] = 'C:\\weights\\ssd_300_VOC0712.pth'
 
-    # image root path
-    path['image'] = 'C:\\images'
+    # root paths
+    path['images'] = 'C:\\images'
+    path['detections'] = 'C:\\detections'
 
-    # output root path
-    path['output'] = 'C:\\outputs'
-
-    # detection paths
-    path['detection'] = os.path.join(path['output'], 'detection')
-    path['detection_text'] = os.path.join(path['detection'], 'text')
-    path['detection_image'] = os.path.join(path['detection'], 'image')
+    # detection results root paths
+    path['detections_text'] = os.path.join(path['detections'], 'text')
+    path['detections_image'] = os.path.join(path['detections'], 'image')
 
     # make directories if not exist
     for key in path.keys():
@@ -75,14 +72,14 @@ def main():
         torch.set_default_tensor_type('torch.FloatTensor')
 
     # get image paths
-    file_paths = get_file_paths_in_directory(directory=path['image'])
+    file_paths = get_file_paths_in_directory(directory=path['images'])
     image_file_paths = filter_file_paths_by_extensions(file_paths=file_paths, extensions=[extension['image']])
 
     # limit samples
     image_file_paths = image_file_paths[0:number_of_samples]
     assert len(image_file_paths) > 0
 
-    # calculate image channels mean
+    # calculate images channel mean
     channel_mean = np.zeros(shape=(3,))
     for image_file_path in image_file_paths:
         # load image file
@@ -95,7 +92,7 @@ def main():
     number_of_training_images = len(image_file_paths)
     channel_mean /= float(number_of_training_images)
     if log:
-        print("Dataset channel mean:", channel_mean)
+        print("Images channel mean:", channel_mean)
 
     # initialize SSD300
     network = build_ssd300(configuration=configuration)
@@ -111,8 +108,8 @@ def main():
         image_name = image_file_path.split(sep='\\')[-1].split(sep='.')[0]
         detection_file_name = image_name + '.' + extension['detection']
         image_file_name = image_name + '.' + extension['image']
-        detection_file_path = os.path.join(path['detection_text'], detection_file_name)
-        detection_image_file_path = os.path.join(path['detection_image'], image_file_name)
+        detection_file_path = os.path.join(path['detections_text'], detection_file_name)
+        detection_image_file_path = os.path.join(path['detections_image'], image_file_name)
 
         # load image file
         image_data = cv2.imread(filename=image_file_path, flags=cv2.IMREAD_COLOR)
@@ -150,7 +147,7 @@ def main():
                     detection = Detection(label=label, score=score, bounding_box=bounding_box)
                     detections.append(detection)
 
-        # save detections
+        # save detections as text
         detection_lines = []
         for detection in detections:
             detection_line = detection_to_line_mapper(detection=detection)
@@ -159,7 +156,7 @@ def main():
         if log:
             print(detection_file_path, 'is saved.')
 
-        # draw detections
+        # draw detections on image
         detection_image = np.copy(image_data)
         for detection in detections:
             if detection.score > threshold['draw']:

@@ -1,3 +1,9 @@
+"""
+Original author: Francisco Massa
+https://github.com/fmassa/vision/blob/voc_dataset/torchvision/datasets/voc.py
+Updated by: Ellis Brown, Max deGroot
+from https://github.com/amdegroot/ssd.pytorch ssd.pytorch/data/voc0712.py file
+"""
 configuration = {
     'labels': [
         'aeroplane', 'bicycle', 'bird', 'boat',
