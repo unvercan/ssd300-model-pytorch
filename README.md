@@ -1,2 +1,2 @@
 # ssd300-pytorch
-SSD300 PyTorch Implementation
+- An implementation of SSD300 using PyTorch 
